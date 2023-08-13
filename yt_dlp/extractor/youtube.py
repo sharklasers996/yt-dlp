@@ -1054,6 +1054,11 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
         channel = (self._get_text(renderer, 'ownerText', 'shortBylineText')
                    or self._get_text(reel_header_renderer, 'channelTitleText'))
 
+
+        channel_thumbnail = traverse_obj(
+            renderer, ('channelThumbnailSupportedRenderers', 'channelThumbnailWithLinkRenderer', 'thumbnail', 'thumbnails', ..., 'url'),
+            expected_type=str, get_all=False)
+
         channel_handle = traverse_obj(renderer, (
             'shortBylineText', 'runs', ..., 'navigationEndpoint',
             (('commandMetadata', 'webCommandMetadata', 'url'), ('browseEndpoint', 'canonicalBaseUrl'))),
@@ -1070,6 +1075,8 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
             'channel': channel,
             'channel_url': f'https://www.youtube.com/channel/{channel_id}' if channel_id else None,
             'uploader': channel,
+            'time_text': time_text,
+            'channel_thumbnail': channel_thumbnail,
             'uploader_id': channel_handle,
             'uploader_url': format_field(channel_handle, None, 'https://www.youtube.com/%s', default=None),
             'thumbnails': self._extract_thumbnails(renderer, 'thumbnail'),
